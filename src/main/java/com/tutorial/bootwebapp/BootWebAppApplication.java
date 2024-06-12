@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("api/v1/persons/")
 @SpringBootApplication
 public class BootWebAppApplication {
 
@@ -29,6 +30,9 @@ public class BootWebAppApplication {
 
     }
 
+    public record PersonUpdateRequest(String name, Integer age) {
+    }
+
     private static AtomicInteger idCounter = new AtomicInteger(0);
 
     public static List<Person> people = new ArrayList<>();
@@ -43,7 +47,7 @@ public class BootWebAppApplication {
     }
 
 
-    @GetMapping("/persons")
+    @GetMapping("/")
     public List<Person> getPersons(
             @RequestParam(value = "sort",
                     required = false,
@@ -68,7 +72,7 @@ public class BootWebAppApplication {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("persons/{id}")
+    @GetMapping("/{id}")
     public Optional<Person> getPersonById(@PathVariable Integer id) {
 
         return people.stream()
@@ -76,15 +80,31 @@ public class BootWebAppApplication {
                 .findFirst();
     }
 
-    @DeleteMapping("persons/{id}")
+    @DeleteMapping("/{id}")
     public String deletePersonById(@PathVariable Integer id) {
         return people.removeIf(person -> person.id == id) ? "Delete Successful" : "User was not found";
     }
 
 
-    @PostMapping("/persons")
+    @PostMapping("")
     public void addPerson(@RequestBody Person person) {
         people.add(new Person(idCounter.incrementAndGet(), person.name, person.age, person.gender));
+    }
+
+    @PutMapping("/{id}")
+    public void updatePersonById(@PathVariable("id") Integer id, @RequestBody PersonUpdateRequest updatedPerson) {
+
+        people.stream()
+                .filter(person -> person.id == id)
+                .findFirst()
+                .ifPresent(person -> {
+                    var index = people.indexOf(person);
+
+                    if (updatedPerson.name != null && !updatedPerson.name.isEmpty() && !updatedPerson.name.equals(person.name)) {
+                        Person newPerson = new Person(person.id(), updatedPerson.name(), person.age, person.gender);
+                        people.set(index, newPerson);
+                    }
+                });
     }
 
 }
