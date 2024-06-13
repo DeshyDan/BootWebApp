@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component
+
 @Order(1)
 public class LoggingFilter implements Filter {
     @Override
