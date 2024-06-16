@@ -2,6 +2,7 @@ package com.tutorial.bootwebapp.person;
 
 
 import com.tutorial.bootwebapp.SortingOrder;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public class PersonController {
 
 
     @PostMapping("")
-    public void addPerson(@RequestBody Person person) {
+    public void addPerson(@Valid @RequestBody Person person) {
         personService.addPerson(person);
     }
 

@@ -1,12 +1,20 @@
 package com.tutorial.bootwebapp.person;
 
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 public class Person {
 
 
     private Integer id;
+
+    @NotEmpty(message = "Name must not be empty")
     private String name;
+    @Min(value = 16, message = "Age must be greater than 16")
     private Integer age;
+    @NotNull(message = "Gender must not be be null")
     private Gender gender;
 
 
