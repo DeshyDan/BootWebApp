@@ -34,7 +34,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Person> getPersonById(@PathVariable Integer id) {
+    public Person getPersonById(@PathVariable Integer id) {
 
         return personService.getPersonById(id);
     }

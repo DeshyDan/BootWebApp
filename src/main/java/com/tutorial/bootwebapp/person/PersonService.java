@@ -1,10 +1,12 @@
 package com.tutorial.bootwebapp.person;
 
 import com.tutorial.bootwebapp.SortingOrder;
+import com.tutorial.bootwebapp.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,20 +38,28 @@ public class PersonService {
     }
 
 
-    public Optional<Person> getPersonById(Integer id) {
+    public Person getPersonById(Integer id) {
 
         return personRepository.getPeople().stream()
-                .filter(person -> person.getId() == id)
-                .findFirst();
+                .filter(person -> person.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Person with id: " + id + " does not exist")
+                );
     }
 
     public String deletePersonById(Integer id) {
-        return personRepository.getPeople().removeIf(person -> person.getId() == id) ? "Delete Successful" : "User was not found";
+        return personRepository.getPeople()
+                .removeIf(person -> person.getId().equals(id)) ? "Delete Successful" : "User was not found";
     }
 
 
     public void addPerson(Person person) {
-        personRepository.getPeople().add(new Person(personRepository.getIdCounter().incrementAndGet(), person.getName(), person.getAge(), person.getGender()));
+        personRepository.getPeople()
+                .add(new Person(personRepository.getIdCounter().incrementAndGet(),
+                        person.getName(),
+                        person.getAge(),
+                        person.getGender()));
     }
 
     public void updatePersonById(Integer id, PersonUpdateRequest updatedPerson) {
