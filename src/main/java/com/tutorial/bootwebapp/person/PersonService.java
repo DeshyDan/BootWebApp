@@ -1,6 +1,7 @@
 package com.tutorial.bootwebapp.person;
 
 import com.tutorial.bootwebapp.SortingOrder;
+import com.tutorial.bootwebapp.exception.BadRequestException;
 import com.tutorial.bootwebapp.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -18,43 +19,40 @@ public class PersonService {
         this.personRepository = personRepository;
     }
 
-    public List<Person> getPersons(
-            SortingOrder order,
-            Integer limit
-    ) {
+    public List<Person> getPersons(SortingOrder order, Integer limit) {
 
         if (order == SortingOrder.ASC) {
-            return personRepository.getPeople().stream()
-                    .limit(limit)
-                    .sorted(Comparator.comparing(Person::getId))
-                    .collect(Collectors.toList());
+            return personRepository.getPeople().stream().limit(limit).sorted(Comparator.comparing(Person::getId)).collect(Collectors.toList());
 
         }
 
-        return personRepository.getPeople().stream()
-                .limit(limit)
-                .sorted(Comparator.comparing(Person::getId).reversed())
-                .collect(Collectors.toList());
+        return personRepository.getPeople().stream().limit(limit).sorted(Comparator.comparing(Person::getId).reversed()).collect(Collectors.toList());
     }
 
 
     public Person getPersonById(Integer id) {
 
-        return personRepository.getPeople().stream()
-                .filter(person -> person.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Person with id: " + id + " does not exist")
-                );
+        return personRepository.getPeople().stream().filter(person -> person.getId()
+                        .equals(id)).
+                findFirst().
+                orElseThrow(() -> new ResourceNotFoundException("Person with id: " + id + " does not exist"));
     }
 
-    public String deletePersonById(Integer id) {
-        return personRepository.getPeople()
-                .removeIf(person -> person.getId().equals(id)) ? "Delete Successful" : "User was not found";
+    public void deletePersonById(Integer id) {
+        Person person = personRepository.getPeople().stream().filter(oldPerson -> oldPerson.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Person with id: " + id + " does not exist"));
+
+        personRepository.getPeople().remove(person);
+
     }
 
 
     public void addPerson(Person person) {
+        System.out.println(person);
+        if (personRepository.isPersonAvailable(person.getName())) {
+            throw new BadRequestException("Name " + person.getName() + "is already taken");
+        }
         personRepository.getPeople()
                 .add(new Person(personRepository.getIdCounter().incrementAndGet(),
                         person.getName(),
@@ -64,16 +62,20 @@ public class PersonService {
 
     public void updatePersonById(Integer id, PersonUpdateRequest updatedPerson) {
 
-        personRepository.getPeople().stream()
-                .filter(person -> person.getId().equals(id))
+        Person person = personRepository.getPeople().stream()
+                .filter(oldPerson -> oldPerson.getId().equals(id))
                 .findFirst()
-                .ifPresent(person -> {
-                    var index = personRepository.getPeople().indexOf(person);
+                .orElseThrow(() -> new ResourceNotFoundException("Person with id: " + id + " does not exist"));
 
-                    if (updatedPerson.getName() != null && !updatedPerson.getName().isEmpty() && !updatedPerson.getName().equals(person.getName())) {
-                        Person newPerson = new Person(person.getId(), updatedPerson.getName(), person.getAge(), person.getGender());
-                        personRepository.getPeople().set(index, newPerson);
-                    }
-                });
+        var index = personRepository.getPeople().indexOf(person);
+
+        if (updatedPerson.getName() != null && !updatedPerson.getName().isEmpty() && !updatedPerson.getName().equals(person.getName())) {
+            Person newPerson = new Person(person.getId(),
+                    updatedPerson.getName(),
+                    person.getAge(),
+                    person.getGender());
+            personRepository.getPeople().set(index, newPerson);
+        }
+
     }
 }

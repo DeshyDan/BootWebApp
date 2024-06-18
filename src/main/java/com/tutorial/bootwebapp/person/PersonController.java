@@ -40,8 +40,8 @@ public class PersonController {
     }
 
     @DeleteMapping("/{id}")
-    public String deletePersonById(@PathVariable Integer id) {
-        return personService.deletePersonById(id);
+    public void deletePersonById(@PathVariable Integer id) {
+        personService.deletePersonById(id);
     }
 
 

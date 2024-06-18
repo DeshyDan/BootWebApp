@@ -28,6 +28,12 @@ public class PersonRepository {
         return idCounter;
     }
 
+    public boolean isPersonAvailable(String name) {
+
+        return people.stream()
+                .anyMatch(person -> person.getName().equals(name));
+    }
+
     public List<Person> getPeople() {
         return people;
     }
