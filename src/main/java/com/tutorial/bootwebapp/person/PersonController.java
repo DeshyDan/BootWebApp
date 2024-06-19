@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/persons/")
@@ -51,8 +50,8 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public void updatePersonById(@PathVariable("id") Integer id, @RequestBody PersonUpdateRequest updatedPerson) {
+    public void updatePersonById(@PathVariable("id") Integer id, @Valid @RequestBody Person person) {
 
-        personService.updatePersonById(id, updatedPerson);
+        personService.updatePersonById(id, person);
     }
 }

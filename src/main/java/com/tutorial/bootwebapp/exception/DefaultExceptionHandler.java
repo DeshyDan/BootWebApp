@@ -46,14 +46,13 @@ public class DefaultExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handle(MethodArgumentNotValidException e, HttpServletRequest request) {
-
         List<String> errors = e.getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
         ApiError apiError = new ApiError(
                 request.getRequestURI(),
-                e.getMessage(),
+                "Invalid arguments",
                 HttpStatus.BAD_REQUEST.value(),
                 ZonedDateTime.now(),
                 errors
